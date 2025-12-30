@@ -37,6 +37,8 @@ int main() {
             return crow::response(result);
         });
 
+        
+
     // View secret page
     CROW_ROUTE(app, "/secret/<string>")
     ([&secretManager](const std::string& id) {
