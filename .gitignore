@@ -1,0 +1,5 @@
+.clang-format
+.cache
+.vscode
+build/
+contrib/
