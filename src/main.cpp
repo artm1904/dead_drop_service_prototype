@@ -13,7 +13,8 @@ std::string LoadTemplate(const std::string& path) {
 }
 
 // Middleware for logging execution time
-struct LogMiddleware {
+// Middleware for logging execution time
+struct LogMiddleware : crow::ILocalMiddleware {
     struct context {
         std::chrono::steady_clock::time_point start_time;
     };
@@ -34,21 +35,15 @@ struct LogMiddleware {
 };
 
 int main() {
-    // Define the app with middleware
+    // Define the app that knows about the middleware
     crow::App<LogMiddleware> app;
     SecretManager secretManager;
 
-    // Serve main page
-    CROW_ROUTE(app, "/")([]() {
-        std::string page = LoadTemplate("templates/index.html");
-        if (page.empty()) return crow::response(500, "Internal Server Error: Template not found");
-        return crow::response(page);
-    });
+    // Create a Blueprint for API related routes
+    crow::Blueprint api_bp("api");
 
-    CROW_ROUTE(app, "/favicon.ico")([] { return ""; });
-
-    // Create secret API
-    CROW_ROUTE(app, "/api/secret")
+    // Create secret API (inside Blueprint)
+    CROW_BP_ROUTE(api_bp, "/api/secret")
         .methods(crow::HTTPMethod::POST)([&secretManager](const crow::request& req) {
             auto x = crow::json::load(req.body);
             if (!x) return crow::response(400);
@@ -61,8 +56,8 @@ int main() {
             return crow::response(result);
         });
 
-    // View secret page
-    CROW_ROUTE(app, "/secret/<string>")
+    // View secret page (inside Blueprint)
+    CROW_BP_ROUTE(api_bp, "/secret/<string>")
     ([&secretManager](const std::string& id) {
         auto secret = secretManager.GetAndBurnSecret(id);
         if (!secret) {
@@ -81,6 +76,22 @@ int main() {
 
         return crow::response(page);
     });
+
+    // Apply LogMiddleware specifically to this Blueprint
+    api_bp.CROW_MIDDLEWARES(app, LogMiddleware);
+
+    // Register Blueprint
+    app.register_blueprint(api_bp);
+
+    // Serve main page (Global rout)
+    CROW_ROUTE(app, "/")([]() {
+        std::string page = LoadTemplate("templates/index.html");
+        if (page.empty()) return crow::response(500, "Internal Server Error: Template not found");
+        return crow::response(page);
+    });
+
+    // Favicon ignore
+    CROW_ROUTE(app, "/favicon.ico")([] { return ""; });
 
     app.port(8080).multithreaded().run();
 }
