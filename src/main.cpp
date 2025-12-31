@@ -12,8 +12,30 @@ std::string LoadTemplate(const std::string& path) {
     return buffer.str();
 }
 
+// Middleware for logging execution time
+struct LogMiddleware {
+    struct context {
+        std::chrono::steady_clock::time_point start_time;
+    };
+
+    void before_handle(crow::request& req, crow::response& res, context& ctx) {
+        ctx.start_time = std::chrono::steady_clock::now();
+    }
+
+    void after_handle(crow::request& req, crow::response& res, context& ctx) {
+        // Filter: ignore static files or specific routes
+        if (req.url == "/favicon.ico") return;
+
+        auto end_time = std::chrono::steady_clock::now();
+        auto duration =
+            std::chrono::duration_cast<std::chrono::microseconds>(end_time - ctx.start_time);
+        CROW_LOG_INFO << "Request to " << req.url << " took " << duration.count() / 1000.0 << " ms";
+    }
+};
+
 int main() {
-    crow::SimpleApp app;
+    // Define the app with middleware
+    crow::App<LogMiddleware> app;
     SecretManager secretManager;
 
     // Serve main page
@@ -22,6 +44,8 @@ int main() {
         if (page.empty()) return crow::response(500, "Internal Server Error: Template not found");
         return crow::response(page);
     });
+
+    CROW_ROUTE(app, "/favicon.ico")([] { return ""; });
 
     // Create secret API
     CROW_ROUTE(app, "/api/secret")
@@ -36,8 +60,6 @@ int main() {
             result["id"] = id;
             return crow::response(result);
         });
-
-        
 
     // View secret page
     CROW_ROUTE(app, "/secret/<string>")
