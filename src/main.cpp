@@ -13,8 +13,24 @@ std::string LoadTemplate(const std::string& path) {
 }
 
 // Middleware for logging execution time
-// Middleware for logging execution time
-struct LogMiddleware : crow::ILocalMiddleware {
+struct LogMiddleware : crow::ILocalMiddleware {  // Make local, not global middleware
+    struct context {
+        std::chrono::steady_clock::time_point start_time;
+    };
+
+    void before_handle(crow::request& req, crow::response& res, context& ctx) {
+        ctx.start_time = std::chrono::steady_clock::now();
+    }
+
+    void after_handle(crow::request& req, crow::response& res, context& ctx) {
+        auto end_time = std::chrono::steady_clock::now();
+        auto duration =
+            std::chrono::duration_cast<std::chrono::microseconds>(end_time - ctx.start_time);
+        CROW_LOG_INFO << "Request to " << req.url << " took " << duration.count() / 1000.0 << " ms";
+    }
+};
+
+struct LogMiddlewareGlobal {
     struct context {
         std::chrono::steady_clock::time_point start_time;
     };
@@ -30,20 +46,21 @@ struct LogMiddleware : crow::ILocalMiddleware {
         auto end_time = std::chrono::steady_clock::now();
         auto duration =
             std::chrono::duration_cast<std::chrono::microseconds>(end_time - ctx.start_time);
-        CROW_LOG_INFO << "Request to " << req.url << " took " << duration.count() / 1000.0 << " ms";
+        CROW_LOG_INFO << "HELLO FROM GLOABAL!! Request to " << req.url << " took "
+                      << duration.count() / 1000.0 << " ms";
     }
 };
 
 int main() {
     // Define the app that knows about the middleware
-    crow::App<LogMiddleware> app;
+    crow::App<LogMiddleware, LogMiddlewareGlobal> app;
     SecretManager secretManager;
 
-    // Create a Blueprint for API related routes
+    // Blueprint for API creation (prefix: /api)
     crow::Blueprint api_bp("api");
 
-    // Create secret API (inside Blueprint)
-    CROW_BP_ROUTE(api_bp, "/api/secret")
+    // Route: /api/secret
+    CROW_BP_ROUTE(api_bp, "/secret")
         .methods(crow::HTTPMethod::POST)([&secretManager](const crow::request& req) {
             auto x = crow::json::load(req.body);
             if (!x) return crow::response(400);
@@ -56,8 +73,11 @@ int main() {
             return crow::response(result);
         });
 
-    // View secret page (inside Blueprint)
-    CROW_BP_ROUTE(api_bp, "/secret/<string>")
+    // Blueprint for Viewing (prefix: /secret)
+    crow::Blueprint view_bp("secret");
+
+    // Route: /secret/<id>
+    CROW_BP_ROUTE(view_bp, "/<string>")
     ([&secretManager](const std::string& id) {
         auto secret = secretManager.GetAndBurnSecret(id);
         if (!secret) {
@@ -67,7 +87,6 @@ int main() {
         std::string page = LoadTemplate("templates/secret.html");
         if (page.empty()) return crow::response(500, "Internal Server Error: Template not found");
 
-        // Simple template replacement
         std::string content = *secret;
         size_t pos = page.find("{{secret_content}}");
         if (pos != std::string::npos) {
@@ -77,11 +96,13 @@ int main() {
         return crow::response(page);
     });
 
-    // Apply LogMiddleware specifically to this Blueprint
+    // Apply LogMiddleware to BOTH blueprints
     api_bp.CROW_MIDDLEWARES(app, LogMiddleware);
+    view_bp.CROW_MIDDLEWARES(app, LogMiddleware);
 
-    // Register Blueprint
+    // Register Blueprints
     app.register_blueprint(api_bp);
+    app.register_blueprint(view_bp);
 
     // Serve main page (Global rout)
     CROW_ROUTE(app, "/")([]() {
