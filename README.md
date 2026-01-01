@@ -11,6 +11,30 @@
 ## Dead Drop Service Walkthrough
 
 
+### Architecture is bellow
+
+```
+dead_drop_service/
+├── cmd/
+│   └── api/
+│       └── main.cpp           # Точка входа (только запуск App)
+├── internal/
+│   ├── app/                   # Сборка приложения (DI-контейнер)
+│   │   ├── app.h
+│   │   └── app.cpp
+│   ├── domain/                # Бизнес-логика (Entities)
+│   │   └── secret_manager.h   # Наш менеджер секретов
+│   ├── delivery/              # Транспортный слой
+│   │   └── http/
+│   │       ├── handler.h      # Обработчики запросов (Controller)
+│   │       └── router.h       # Настройка маршрутов и Blueprints
+│   └── middleware/
+│       └── logging.h          # Наши LogMiddleware
+├── templates/                 # Шаблоны (.html, .css, .js)
+└── CMakeLists.txt
+```
+
+
 ### What was built
 - Core Logic: SecretManager (in-memory, thread-safe).
 - Web Server: C++ Crow application running on port 8080.
@@ -27,9 +51,7 @@ Ran automated tests in verify.py:
 ### How to run
 1) Build:
 ```
-mkdir build && cd build
-cmake ..
-cmake --build .
+mkdir -p build && cd build && cmake .. && cmake --build .
 ```
 
 2) Run:
