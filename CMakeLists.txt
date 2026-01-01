@@ -4,6 +4,10 @@ project(dead_drop_service)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+if(UNIX AND NOT APPLE)
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-z,stack-size=8388608")
+endif()
+
 # CPM Setup
 set(CPM_DOWNLOAD_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/cmake/CPM_0.40.0.cmake")
 set(CPM_SOURCE_CACHE "${CMAKE_CURRENT_SOURCE_DIR}/contrib")
@@ -37,7 +41,7 @@ endif()
 CPMAddPackage(
     NAME Crow
     GITHUB_REPOSITORY CrowCpp/Crow
-    GIT_TAG v1.2.0
+    GIT_TAG v1.3.0
     OPTIONS "CROW_BUILD_EXAMPLES OFF" "CROW_BUILD_TESTS OFF"
 )
 
@@ -48,10 +52,12 @@ CPMAddPackage(
     GIT_TAG v3.11.3
 )
 
-add_executable(dead_drop_service src/main.cpp)
+add_executable(dead_drop_service cmd/api/main.cpp)
 
 target_link_libraries(dead_drop_service PRIVATE Crow::Crow nlohmann_json::nlohmann_json)
 target_include_directories(dead_drop_service PRIVATE ${asio_SOURCE_DIR}/asio/include)
+# Allow including internal headers without relative paths
+target_include_directories(dead_drop_service PRIVATE ${CMAKE_SOURCE_DIR})
 
 # Copy templates to build directory
 add_custom_command(TARGET dead_drop_service POST_BUILD
