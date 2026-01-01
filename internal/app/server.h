@@ -42,7 +42,7 @@ class Server {
 
         // Run
         try {
-            app.port(8080).run();
+            app.port(8080).multithreaded().run();
         } catch (const std::exception& e) {
             CROW_LOG_ERROR << "Server crashed: " << e.what();
         }
