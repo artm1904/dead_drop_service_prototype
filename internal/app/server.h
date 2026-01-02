@@ -4,6 +4,7 @@
 
 #include "internal/delivery/http/handler.h"
 #include "internal/delivery/http/router.h"
+#include "internal/domain/fs_cash.h"
 #include "internal/domain/secret_manager.h"
 #include "internal/server_types.h"
 
@@ -16,8 +17,10 @@ class Server {
         // Init Core Logic
         SecretManager secretManager;
 
+        ReadOnlyCache templates("templates");
+
         // Init Handlers
-        SecretHandler handler(secretManager);
+        SecretHandler handler(secretManager, templates);
 
         // Init Web Server (Stack allocated)
         AppType app;

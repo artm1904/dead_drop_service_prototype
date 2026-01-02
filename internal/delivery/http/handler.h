@@ -5,11 +5,13 @@
 
 #include "crow.h"
 #include "crow/http_response.h"
+#include "internal/domain/fs_cash.h"
 #include "internal/domain/secret_manager.h"
 
 class SecretHandler {
    public:
-    explicit SecretHandler(SecretManager& sm) : secretManager_(sm) {}
+    explicit SecretHandler(SecretManager& sm, ReadOnlyCache& templates)
+        : secretManager_(sm), templates_(templates) {}
 
     // GET /
     crow::response Index() { return LoadTemplate("templates/index.html"); }
@@ -54,6 +56,7 @@ class SecretHandler {
 
    private:
     SecretManager& secretManager_;
+    ReadOnlyCache templates_;
 
     // Helper to read file separate from routing logic
     crow::response LoadTemplate(const std::string& path) {
@@ -65,11 +68,13 @@ class SecretHandler {
         return response;
     }
 
-    std::string LoadTemplateString(const std::string& path) {
-        std::ifstream t(path);
-        if (!t.is_open()) return "";
-        std::stringstream buffer;
-        buffer << t.rdbuf();
-        return buffer.str();
-    }
+    // std::string LoadTemplateString(const std::string& path) {
+    //     std::ifstream t(path);
+    //     if (!t.is_open()) return "";
+    //     std::stringstream buffer;
+    //     buffer << t.rdbuf();
+    //     return buffer.str();
+    // }
+
+    std::string LoadTemplateString(const std::string& path) { return templates_.Get(path); }
 };
