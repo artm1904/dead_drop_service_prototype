@@ -12,10 +12,10 @@ file(APPEND "${OUTPUT_FILE}" "#include <unordered_map>\n\n")
 file(APPEND "${OUTPUT_FILE}" "// Auto-generated file. Do not edit directly.\n")
 file(APPEND "${OUTPUT_FILE}" "const std::unordered_map<std::string, std::string> embedded_files = {\n")
 
-# Find all HTML files in the input directory
-file(GLOB HTML_FILES "${INPUT_DIR}/*.html")
+# Find all HTML and CSS files in the input directory
+file(GLOB RESOURCE_FILES "${INPUT_DIR}/*.html" "${INPUT_DIR}/*.css")
 
-foreach(FILE_PATH ${HTML_FILES})
+foreach(FILE_PATH ${RESOURCE_FILES})
     # Get filename (e.g. index.html)
     get_filename_component(FILE_NAME "${FILE_PATH}" NAME)
 
