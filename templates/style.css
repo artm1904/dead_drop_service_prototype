@@ -1,0 +1,116 @@
+:root {
+    --bg-color: #0d0d0d;
+    --card-bg: #111;
+    --text-color: #e0e0e0;
+    --accent-color: #00ff41; /* Hacker Green */
+    --accent-glow: 0 0 10px rgba(0, 255, 65, 0.5);
+    --error-color: #ff3333;
+    --font-mono: 'Courier New', Courier, monospace;
+    --border-color: #333;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: var(--font-mono);
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.container {
+    width: 100%;
+    max-width: 600px;
+    padding: 20px;
+}
+
+.card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--accent-color);
+    padding: 30px;
+    box-shadow: var(--accent-glow);
+    border-radius: 4px; /* Minimal rounding */
+}
+
+h1 {
+    text-align: center;
+    color: var(--accent-color);
+    text-shadow: var(--accent-glow);
+    margin-bottom: 30px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+textarea {
+    width: 100%;
+    height: 150px;
+    background-color: #000;
+    border: 1px solid var(--border-color);
+    color: var(--accent-color);
+    font-family: var(--font-mono);
+    padding: 15px;
+    box-sizing: border-box;
+    resize: vertical;
+    outline: none;
+    margin-bottom: 20px;
+}
+
+textarea:focus {
+    border-color: var(--accent-color);
+}
+
+button {
+    width: 100%;
+    padding: 15px;
+    background-color: transparent;
+    border: 1px solid var(--accent-color);
+    color: var(--accent-color);
+    font-family: var(--font-mono);
+    font-weight: bold;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.2s;
+}
+
+button:hover {
+    background-color: var(--accent-color);
+    color: #000;
+    box-shadow: var(--accent-glow);
+}
+
+.secret-view {
+    white-space: pre-wrap;
+    word-break: break-all;
+    background: #000;
+    padding: 20px;
+    border: 1px dashed var(--accent-color);
+    margin: 20px 0;
+}
+
+.warning {
+    color: var(--error-color);
+    text-align: center;
+    border: 1px solid var(--error-color);
+    padding: 10px;
+    margin-bottom: 20px;
+}
+
+.burn-notice {
+    text-align: center;
+    font-size: 0.8em;
+    color: #666;
+    margin-top: 20px;
+}
+
+/* Animations */
+@keyframes flicker {
+    0% { opacity: 1; }
+    50% { opacity: 0.8; }
+    100% { opacity: 1; }
+}
+
+.card {
+    animation: flicker 4s infinite;
+}

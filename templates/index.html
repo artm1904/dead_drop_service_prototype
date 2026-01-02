@@ -1,194 +1,66 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Создать новую ячейку DeadDrop</title>
-    <style>
-        :root {
-            --primary-color: #2563eb;
-            --bg-color: #f8fafc;
-            --card-bg: #ffffff;
-            --text-color: #1e293b;
-            --border-radius: 12px;
-        }
-
-        body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-        }
-
-        .container {
-            background: var(--card-bg);
-            padding: 2rem;
-            border-radius: var(--border-radius);
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-            width: 100%;
-            max-width: 500px;
-        }
-
-        h1 {
-            font-size: 1.5rem;
-            margin-bottom: 1.5rem;
-            color: #0f172a;
-        }
-
-        .form-group {
-            margin-bottom: 1.25rem;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            font-size: 0.925rem;
-        }
-
-        textarea,
-        input[type="number"],
-        input[type="file"] {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            font-family: inherit;
-            font-size: 1rem;
-            box-sizing: border-box;
-            /* Важно для padding */
-            transition: border-color 0.2s;
-        }
-
-        textarea:focus,
-        input:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        }
-
-        textarea {
-            resize: vertical;
-            min-height: 120px;
-        }
-
-        .btn {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-            transition: background-color 0.2s;
-        }
-
-        .btn:hover {
-            background-color: #1d4ed8;
-        }
-
-        #result {
-            margin-top: 1.5rem;
-            padding: 1rem;
-            background: #f1f5f9;
-            border-radius: 6px;
-            display: none;
-            border: 1px solid #e2e8f0;
-        }
-
-        #result p {
-            margin: 0 0 0.5rem 0;
-            font-weight: 500;
-        }
-
-        #secretLink {
-            word-break: break-all;
-            font-family: monospace;
-            background: white;
-            padding: 4px 8px;
-            border-radius: 4px;
-            border: 1px solid #e2e8f0;
-            display: block;
-        }
-    </style>
+    <title>Dead Drop | Secure Share</title>
+    <link rel="stylesheet" href="/style.css">
 </head>
 
 <body>
-
     <div class="container">
-        <h1>Создать новую ячейку DeadDrop</h1>
-
-        <form id="createForm" action="#" onsubmit="handleForm(event)">
-            <div class="form-group">
-                <label for="message">Сообщение:</label>
-                <textarea id="message" name="message" rows="5" required
-                    placeholder="Введите ваше секретное сообщение..."></textarea>
-            </div>
-
-            <div class="form-group">
-                <label for="file">Прикрепить файл (опционально):</label>
-                <input type="file" id="file" name="file">
-                <small style="color: #64748b; display: block; margin-top: 4px;">(Пока не сохраняется на сервере)</small>
-            </div>
-
-            <div class="form-group">
-                <label for="ttl">Время жизни ячейки (часов, опционально):</label>
-                <input type="number" id="ttl" name="ttl" min="1" placeholder="Например, 24" value="24">
-            </div>
-
-            <button type="submit" class="btn">Создать ячейку</button>
-        </form>
-
-        <div id="result">
-            <p>Ссылка на ячейку (скопируйте её):</p>
-            <code id="secretLink">...</code>
+        <div class="card">
+            <h1>Dead Drop</h1>
+            <textarea id="secretInput" placeholder="Paste your secret/password/keys here..."></textarea>
+            <button id="createBtn" onclick="createSecret()">Encrypt & Share</button>
+            <div id="result" class="secret-view" style="display:none; text-align: center;"></div>
         </div>
     </div>
 
     <script>
-        async function handleForm(event) {
-            event.preventDefault();
+        async function createSecret() {
+            const secret = document.getElementById('secretInput').value;
+            if (!secret) return;
 
-            const message = document.getElementById('message').value;
-            // Файл и TTL пока игнорируем, так как бэкенд их не ждет
-
-            if (!message) return;
+            const btn = document.getElementById('createBtn');
+            btn.innerText = "Encrypting...";
+            btn.disabled = true;
 
             try {
                 const response = await fetch('/api/secret', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        secret: message
-                    })
+                    body: JSON.stringify({ secret: secret })
                 });
 
                 if (response.ok) {
                     const data = await response.json();
-                    const link = `${window.location.protocol}//${window.location.host}/secret/${data.id}`;
+                    const link = window.location.origin + "/secret/" + data.id;
 
-                    document.getElementById('secretLink').textContent = link;
-                    document.getElementById('result').style.display = 'block';
+                    document.getElementById('secretInput').style.display = 'none';
+                    btn.style.display = 'none';
 
-                    // Опционально: очистить форму
-                    // document.getElementById('message').value = '';
+                    const resultDiv = document.getElementById('result');
+                    resultDiv.style.display = 'block';
+                    resultDiv.innerHTML = `
+                        <p style="color:#aaa">Secret Link (One-time use):</p>
+                        <a href="${link}" style="color:var(--accent-color); font-size:1.2em;">${link}</a>
+                        <p class="burn-notice">This link will self-destruct after reading.</p>
+                    `;
                 } else {
-                    alert('Ошибка при создании ячейки');
+                    alert("System Error. Connection Terminated.");
+                    btn.innerText = "Encrypt & Share";
+                    btn.disabled = false;
                 }
             } catch (e) {
                 console.error(e);
-                alert('Ошибка сети или сервера');
+                alert("Network Error.");
+                btn.innerText = "Encrypt & Share";
+                btn.disabled = false;
             }
         }
     </script>
-
 </body>
 
 </html>
