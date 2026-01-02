@@ -5,7 +5,7 @@
 
 #include "crow.h"
 #include "crow/http_response.h"
-#include "internal/domain/fs_cash.h"
+#include "internal/domain/read_only_cache.h"
 #include "internal/domain/secret_manager.h"
 
 class SecretHandler {

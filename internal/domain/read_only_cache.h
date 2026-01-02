@@ -5,9 +5,18 @@
 #include <sstream>
 #include <unordered_map>
 
+// Подключаем сгенерированный файл через скрипт CMake
+#include "internal/domain/embedded_resources.h"
+
 class ReadOnlyCache {
    public:
-    // Load all templates from directory
+    // Режим 1: Embedded (Prod)
+    ReadOnlyCache() {
+        // embedded_files - это переменная из сгенерированного хедера
+        templates_ = embedded_files;  // Копируем из глобальной константы
+    }
+
+    // Режим 2: Filesystem (Dev). Load all templates from directory
     explicit ReadOnlyCache(const std::string& path) {
         std::filesystem::path p(path);
         if (!std::filesystem::exists(p)) {

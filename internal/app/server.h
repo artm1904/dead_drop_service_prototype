@@ -4,7 +4,7 @@
 
 #include "internal/delivery/http/handler.h"
 #include "internal/delivery/http/router.h"
-#include "internal/domain/fs_cash.h"
+#include "internal/domain/read_only_cache.h"
 #include "internal/domain/secret_manager.h"
 #include "internal/server_types.h"
 
@@ -17,7 +17,7 @@ class Server {
         // Init Core Logic
         SecretManager secretManager;
 
-        ReadOnlyCache templates("templates");
+        ReadOnlyCache templates;
 
         // Init Handlers
         SecretHandler handler(secretManager, templates);
