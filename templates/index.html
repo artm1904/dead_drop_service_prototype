@@ -13,6 +13,16 @@
         <div class="card">
             <h1>Dead Drop</h1>
             <textarea id="secretInput" placeholder="Paste your secret/password/keys here..."></textarea>
+
+            <label for="fileInput">Attachment (Optional):</label>
+            <input type="file" id="fileInput">
+
+            <label for="ttlSelect">Self-Destruct Timer:</label>
+            <select id="ttlSelect">
+                <option value="1h">1 Hour</option>
+                <option value="24h">24 Hours</option>
+                <option value="7d">7 Days</option>
+            </select>
             <button id="createBtn" onclick="createSecret()">Encrypt & Share</button>
             <div id="result" class="secret-view" style="display:none; text-align: center;"></div>
         </div>

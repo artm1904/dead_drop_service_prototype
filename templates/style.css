@@ -2,7 +2,8 @@
     --bg-color: #0d0d0d;
     --card-bg: #111;
     --text-color: #e0e0e0;
-    --accent-color: #00ff41; /* Hacker Green */
+    --accent-color: #00ff41;
+    /* Hacker Green */
     --accent-glow: 0 0 10px rgba(0, 255, 65, 0.5);
     --error-color: #ff3333;
     --font-mono: 'Courier New', Courier, monospace;
@@ -31,7 +32,8 @@ body {
     border: 1px solid var(--accent-color);
     padding: 30px;
     box-shadow: var(--accent-glow);
-    border-radius: 4px; /* Minimal rounding */
+    border-radius: 4px;
+    /* Minimal rounding */
 }
 
 h1 {
@@ -59,6 +61,33 @@ textarea {
 
 textarea:focus {
     border-color: var(--accent-color);
+}
+
+select,
+input[type="file"] {
+    width: 100%;
+    background-color: #000;
+    border: 1px solid var(--border-color);
+    color: var(--accent-color);
+    font-family: var(--font-mono);
+    padding: 10px;
+    margin-bottom: 20px;
+    box-sizing: border-box;
+    cursor: pointer;
+}
+
+select:focus,
+input[type="file"]:focus {
+    border-color: var(--accent-color);
+    outline: none;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--text-color);
+    font-size: 0.9em;
+    text-transform: uppercase;
 }
 
 button {
@@ -106,9 +135,17 @@ button:hover {
 
 /* Animations */
 @keyframes flicker {
-    0% { opacity: 1; }
-    50% { opacity: 0.8; }
-    100% { opacity: 1; }
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.8;
+    }
+
+    100% {
+        opacity: 1;
+    }
 }
 
 .card {
