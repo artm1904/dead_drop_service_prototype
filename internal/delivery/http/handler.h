@@ -19,6 +19,15 @@ class SecretHandler {
     // GET /favicon.ico
     crow::response Favicon() { return crow::response(""); }
 
+    // GET /style.css
+    crow::response GetStyle() {
+        std::string content = LoadTemplateString("templates/style.css");
+        if (content.empty()) return crow::response(404);
+        crow::response res(content);
+        res.set_header("Content-Type", "text/css");
+        return res;
+    }
+
     // POST /api/secret
     crow::response CreateSecret(const crow::request& req) {
         auto x = crow::json::load(req.body);

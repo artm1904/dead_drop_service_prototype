@@ -39,6 +39,7 @@ class Server {
 
         // 3. Global Routes
         CROW_ROUTE(app, "/")([&handler]() { return handler.Index(); });
+        CROW_ROUTE(app, "/style.css")([&handler]() { return handler.GetStyle(); });
         CROW_ROUTE(app, "/favicon.ico")([&handler]() { return handler.Favicon(); });
 
         CROW_LOG_INFO << "Starting Dead Drop Service on port 8080...";
