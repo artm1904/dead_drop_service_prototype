@@ -1,0 +1,41 @@
+# Walkthrough: EmbedFS & Hacker UI
+## Changes Accomplished
+1. Single Binary Deployment (EmbedFS)
+We eliminated the dependency on the templates/ folder at runtime.
+
+Before: The server crashed if templates/ was missing.
+After: All HTML/CSS files are compiled into embedded_resources.h and built into the binary.
+Mechanism: A CMake script (
+cmake/GenerateResources.cmake
+) converts files to hex strings before compilation. 
+ReadOnlyCache
+ loads these strings by default.
+2. Frontend Redesign (Theme: "Hacker / Cyberpunk")
+We replaced the default browser look with a custom dark theme.
+
+Colors: Deep black background (#0d0d0d), Neon Green accents (#00ff41).
+Typography: Monospace (Courier New) for that terminal vibe.
+Animations: Subtle screen flicker and glow effects.
+UX:
+"Encrypt & Share" button with status updates.
+Result page shows a one-time link that is clearly distinct.
+
+## Verification Results
+Automated Tests
+Run curl to verify headers and content:
+
+```
+# Verify Style Sheet
+curl -v http://localhost:8080/style.css
+# Output: HTTP/1.1 200 OK ... Content-Type: text/css
+# Verify Index Page
+curl -v http://localhost:8080/
+# Output: HTTP/1.1 200 OK ... <link rel="stylesheet" href="/style.css">
+```
+
+## Visuals
+![alt text](image.png)
+
+## Next Steps
+Implement Client-Side Encryption (WebCrypto API) so the server never sees the raw secret.
+Add Password Protection for secrets.
