@@ -4,6 +4,7 @@
 #include <sstream>
 
 #include "crow.h"
+#include "crow/http_response.h"
 #include "internal/domain/secret_manager.h"
 
 class SecretHandler {
@@ -46,7 +47,9 @@ class SecretHandler {
             page_content.replace(pos, 18, content);
         }
 
-        return crow::response(page_content);
+        crow::response response(page_content);
+        response.set_header("Content-Type", "text/html");
+        return response;
     }
 
    private:
@@ -57,7 +60,9 @@ class SecretHandler {
         std::string content = LoadTemplateString(path);
         if (content.empty())
             return crow::response(500, "Internal Server Error: Template not found");
-        return crow::response(content);
+        crow::response response(content);
+        response.set_header("Content-Type", "text/html");
+        return response;
     }
 
     std::string LoadTemplateString(const std::string& path) {
