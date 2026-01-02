@@ -52,9 +52,38 @@ CPMAddPackage(
     GIT_TAG v3.11.3
 )
 
-add_executable(dead_drop_service cmd/api/main.cpp)
+
+# --- Embedded Resources Generation ---
+set(RESOURCE_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/cmake/GenerateResources.cmake")
+set(TEMPLATES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/templates")
+set(GENERATED_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated")
+set(EMBEDDED_HEADER "${GENERATED_DIR}/internal/domain/embedded_resources.h")
+
+# Ensure the output directory exists
+file(MAKE_DIRECTORY "${GENERATED_DIR}/internal/domain")
+
+add_custom_command(
+    OUTPUT "${EMBEDDED_HEADER}"
+    COMMAND ${CMAKE_COMMAND}
+    -DINPUT_DIR=${TEMPLATES_DIR}
+    -DOUTPUT_FILE=${EMBEDDED_HEADER}
+    -P "${RESOURCE_SCRIPT}"
+    DEPENDS "${RESOURCE_SCRIPT}"
+    COMMENT "Generating embedded resources header..."
+    VERBATIM
+)
+
+add_executable(dead_drop_service
+    cmd/api/main.cpp
+    "${EMBEDDED_HEADER}"
+)
 
 target_link_libraries(dead_drop_service PRIVATE Crow::Crow nlohmann_json::nlohmann_json)
+
+target_include_directories(dead_drop_service PRIVATE
+    "${CMAKE_CURRENT_SOURCE_DIR}"
+    "${GENERATED_DIR}"
+)
 target_include_directories(dead_drop_service PRIVATE ${asio_SOURCE_DIR}/asio/include)
 # Allow including internal headers without relative paths
 target_include_directories(dead_drop_service PRIVATE ${CMAKE_SOURCE_DIR})
